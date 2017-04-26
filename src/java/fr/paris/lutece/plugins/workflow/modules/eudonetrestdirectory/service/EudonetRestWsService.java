@@ -1,12 +1,9 @@
 package fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.service;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.EudonetRestData;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.TaskEudonetRestConfig;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.threadService.AcdpThread;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.utils.EudonetRestException;

@@ -275,14 +275,11 @@ public class BuildJsonBodyService
         for ( EudonetRestData entry : _entries )
         {
             String strIdTable = entry.getIdTable( ).split( "-" ) [0];
-            // String strIdTableLink = entry.getIdTableLink( ).split( "-" ) [0];
 
-            // if( strIdTable.equals("" + nIdTable) && entry.getOrderEntry() != -1)
             if ( strIdTable.equals( "" + nIdTable ) )
             {
                 String strIdAtt = entry.getIdAttribut( ).split( "-" ) [0];
                 JSONObject jsonObject = new JSONObject( );
-                jsonObject.accumulate( "DescId", Integer.parseInt( strIdAtt ) );
 
                 if ( entry.getOrderEntry( ) == -1 )
                 {
@@ -292,12 +289,14 @@ public class BuildJsonBodyService
                     {
                         if ( !strIdTableLink.isEmpty( ) && eudonetLink.getIdTable( ).equals( strIdTableLink ) )
                         {
+                            jsonObject.accumulate( "DescId", Integer.parseInt( eudonetLink.getIdTable( ) ) );
                             jsonObject.accumulate( "Value", "" + eudonetLink.getIdField( ) );
                         }
                     }
                 }
                 else
                 {
+                    jsonObject.accumulate( "DescId", Integer.parseInt( strIdAtt ) );
                     jsonObject.accumulate( "Value", getRecordFieldValue( entry.getOrderEntry( ), nIdRessource, nIdDirectory ) );
                 }
 
