@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+
+	
+    <!-- DAO -->
+    <bean id="workflow-eudonetrestdirectory.taskEudonetRestConfigDAO" class="fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.TaskEudonetRestConfigDAO" />
+    <bean id="workflow-eudonetrestdirectory.eudonetLinkDAO" class="fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.EudonetLinkDAO" />
+    
+     <bean id="workflow-eudonetrestdirectory.taskExportDemand" class="fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.service.TaskExportDemand" scope="prototype"/>
+     <bean id="workflow-eudonetrestdirectory.taskExportDemandConfig" class="fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.TaskEudonetRestConfig" scope="prototype" />
+    
+	<!-- Task -->
+	<bean id="workflow-eudonetrestdirectory.taskExportDemandType" class="fr.paris.lutece.plugins.workflowcore.business.task.TaskType"
+		p:key="taskExportDemand"
+		p:titleI18nKey="module.workflow.eudonetrestdirectory.task_export_demand_title"
+														 
+		p:beanName="workflow-eudonetrestdirectory.taskExportDemand"
+		p:configBeanName="workflow-eudonetrestdirectory.taskExportDemandConfig"
+		p:configRequired="true"
+		p:taskForAutomaticAction="true" />
+	<bean id="workflow-eudonetrestdirectory.exportDemandTaskComponent" class="fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.web.EudonetRestTaskComponent"
+		p:taskType-ref="workflow-eudonetrestdirectory.taskExportDemandType"
+		p:taskConfigService-ref="workflow-eudonetrestdirectory.taskEudonetRestConfigService" />
+	
+	<!-- Services -->
+	<bean id="workflow-eudonetrestdirectory.taskEudonetRestConfigService" class="fr.paris.lutece.plugins.workflowcore.service.config.TaskConfigService"
+		p:taskConfigDAO-ref="workflow-eudonetrestdirectory.taskEudonetRestConfigDAO" />
+	
+	<!-- bean à brancher -->
+	
+	<bean id="workflow-eudonetrestdirectory.eudonetRestWsService" class="fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.service.EudonetRestWsService"></bean>
+    
+</beans>
+ 	
