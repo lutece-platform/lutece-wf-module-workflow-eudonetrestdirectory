@@ -202,7 +202,6 @@ public class BuildJsonBodyService
                     return recordFieldIdDemand.getFile( );
                 }
             }
-
         }
 
         return null;
@@ -265,43 +264,37 @@ public class BuildJsonBodyService
         return jsonObjectFinal.toString( );
     }
 
-    public String getCreateRecordJsonBodyLink( int nIdTable, List<EudonetRestData> _entries, int nIdRessource, int nIdDirectory )
+    public String getCreateRecordJsonBodyLink( int nIdTable, List<EudonetRestData> _entries, int nIdRessource, int nIdDirectory, List<Integer> listTableLinked )
     {
-        List<EudonetLink> eudonetLinkList = EudonetLinkHome.findAll( nIdTable );
-
         JSONObject jsonObjectFinal = new JSONObject( );
         JSONArray jsonArray = new JSONArray( );
 
         for ( EudonetRestData entry : _entries )
         {
             String strIdTable = entry.getIdTable( ).split( "-" ) [0];
+            String strIdTableLink = entry.getIdTableLink( ).split( "-" ) [0];
 
-            if ( strIdTable.equals( "" + nIdTable ) )
+            if ( strIdTable.equals( "" + nIdTable ) && strIdTableLink.isEmpty( ) )
             {
                 String strIdAtt = entry.getIdAttribut( ).split( "-" ) [0];
                 JSONObject jsonObject = new JSONObject( );
 
-                if ( entry.getOrderEntry( ) == -1 )
-                {
-                    String strIdTableLink = entry.getIdTableLink( ).split( "-" ) [0];
-
-                    for ( EudonetLink eudonetLink : eudonetLinkList )
-                    {
-                        if ( !strIdTableLink.isEmpty( ) && eudonetLink.getIdTable( ).equals( strIdTableLink ) )
-                        {
-                            jsonObject.accumulate( "DescId", Integer.parseInt( eudonetLink.getIdTable( ) ) );
-                            jsonObject.accumulate( "Value", "" + eudonetLink.getIdField( ) );
-                        }
-                    }
-                }
-                else
-                {
-                    jsonObject.accumulate( "DescId", Integer.parseInt( strIdAtt ) );
-                    jsonObject.accumulate( "Value", getRecordFieldValue( entry.getOrderEntry( ), nIdRessource, nIdDirectory ) );
-                }
+                jsonObject.accumulate( "DescId", Integer.parseInt( strIdAtt ) );
+                jsonObject.accumulate( "Value", getRecordFieldValue( entry.getOrderEntry( ), nIdRessource, nIdDirectory ) );
 
                 jsonArray.add( jsonObject );
             }
+        }
+
+        for ( Integer i : listTableLinked )
+        {
+            EudonetLink eudonetLink = EudonetLinkHome.findBy( nIdRessource, i );
+            JSONObject jsonObject = new JSONObject( );
+
+            jsonObject.accumulate( "DescId", eudonetLink.getIdTable( ) );
+            jsonObject.accumulate( "Value", "" + eudonetLink.getIdField( ) );
+
+            jsonArray.add( jsonObject );
         }
 
         jsonObjectFinal.accumulate( "Fields", jsonArray );
@@ -309,34 +302,14 @@ public class BuildJsonBodyService
         return jsonObjectFinal.toString( );
     }
 
-    public List<Integer> isTableLinked( int nIdTable, List<EudonetRestData> _entries )
-    {
-        List<Integer> tableLinked = new ArrayList<Integer>( );
-
-        for ( EudonetRestData entry : _entries )
-        {
-            String strIdTable = entry.getIdTable( ).split( "-" ) [0];
-            if ( strIdTable.equals( "" + nIdTable ) )
-            {
-                if ( entry.getIdTableLink( ) != null && !entry.getIdTableLink( ).isEmpty( ) )
-                {
-                    String strIdTableLink = entry.getIdTableLink( ).split( "-" ) [0];
-                    tableLinked.add( Integer.parseInt( strIdTableLink ) );
-                }
-            }
-        }
-
-        return tableLinked;
-    }
-
-    public JSONArray getCreateAnnexeJsonBody( int nIdFile, int nIdTable, List<EudonetRestData> _entries, int nIdRessource, int nIdDirectory )
+    public JSONArray getCreateAnnexeJsonBody( int nIdFile, int nIdTableLink, List<EudonetRestData> _entries, int nIdRessource, int nIdDirectory )
     {
         JSONArray jsonArray = new JSONArray( );
 
         for ( EudonetRestData entry : _entries )
         {
-            String strIdTable = entry.getIdTableLink( ).split( "-" ) [0];
-            if ( strIdTable.equals( "" + nIdTable ) )
+            String strIdTableLink = entry.getIdTableLink( ).split( "-" ) [0];
+            if ( strIdTableLink.equals( "" + nIdTableLink ) )
             {
                 File file = getRecordFileValue( entry.getOrderEntry( ), nIdRessource, nIdDirectory );
                 if ( file != null )
@@ -353,7 +326,7 @@ public class BuildJsonBodyService
 
                     JSONObject jsonObject = new JSONObject( );
                     jsonObject.accumulate( "FileId", nIdFile );
-                    jsonObject.accumulate( "TabId", nIdTable );
+                    jsonObject.accumulate( "TabId", nIdTableLink );
                     jsonObject.accumulate( "FileName", strFileName );
                     jsonObject.accumulate( "Content", strContent );
                     jsonObject.accumulate( "IsUrl", false );
@@ -364,5 +337,30 @@ public class BuildJsonBodyService
         }
 
         return jsonArray;
+    }
+
+    public String getMetaInfosJsonBody( String strIdTable )
+    {
+        if ( strIdTable != null )
+        {
+            JSONObject jsonObject = new JSONObject( );
+            JSONArray jsonArray = new JSONArray( );
+            JSONObject jsonElement = new JSONObject( );
+            JSONArray jsonElementArray = new JSONArray( );
+
+            jsonElementArray.add( 0 );
+
+            jsonElement.accumulate( "DescId", Integer.parseInt( strIdTable ) );
+            jsonElement.accumulate( "AllFields", true );
+            jsonElement.accumulate( "Fields", jsonElementArray );
+
+            jsonArray.add( jsonElement );
+
+            jsonObject.accumulate( "Tables", jsonArray );
+
+            return jsonObject.toString( );
+        }
+
+        return null;
     }
 }

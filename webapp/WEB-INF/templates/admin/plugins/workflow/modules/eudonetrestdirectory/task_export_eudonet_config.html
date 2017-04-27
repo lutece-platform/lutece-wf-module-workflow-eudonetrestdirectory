@@ -6,10 +6,7 @@
 	<#assign idTableEudonet = taskConfig.idTableEudonet!>	
 </#if>
 
-
 <p class="lead">#i18n{module.workflow.eudonetrestdirectory.task_eudonet_config.title}</p>
-
-
 
 <#if taskConfig?exists && taskConfig?has_content >
 
@@ -99,18 +96,24 @@
 	</div>
 </div>
 
+<div class="form-group">
+	<label class="control-label col-xs-12 col-sm-12 col-md-3 col-lg-3" for="idDirectory">#i18n{module.workflow.eudonetrestdirectory.task_eudonet_config.label.mapping_annexe} </label>
+	<div class="col-xs-12 col-sm-12 col-md-9 col-lg-9">
+		<@comboWithParams name="id_tableEudonet_link" default_value="" additionalParameters="class=\"input-xxlarge\"" items=list_tableEudonet_link />
+	</div>
+</div>
 
 <div class="form-group">
 	<label class="control-label col-xs-12 col-sm-12 col-md-3 col-lg-3" for="idDirectory">#i18n{module.workflow.eudonetrestdirectory.task_eudonet_config.label.mapping} </label>
 	<div class="col-xs-12 col-sm-12 col-md-9 col-lg-9">
 		<@comboWithParams name="order_entry" default_value=idDirectory?string additionalParameters="class=\"input-xxlarge\"" items=list_entries />
 		<@comboWithParams name="eudonet_attribut" default_value="" additionalParameters="class=\"input-xxlarge\"" items=list_attribut />
-		<@comboWithParams name="id_tableEudonet_link" default_value="" additionalParameters="class=\"input-xxlarge\"" items=list_tableEudonet_link />
 		<button type="submit" value="createEntry" name="apply" class="btn btn-primary btn-sm btn-flat">
 			<i class="glyphicon glyphicon-ok-circle"></i>&nbsp;#i18n{module.workflow.eudonetrestdirectory.task_eudonet_config.button.apply}
 		</button>
 	</div>
 </div>
+
 
 <#if entries?exists && entries?has_content >
 <@table>
@@ -118,7 +121,7 @@
             <input type="hidden" id="id" name="id"/>
             <th>Attribut Eudonet</th>
             <th>Table Eudonet</th>
-            <th>Table Eudonet Liée</th>
+            <th>Table Eudonet Liée à l'annexe</th>
             <th>Valeur Entrie</th>
             <th>Nom Entrie</th>
             <th>#i18n{portal.util.labelActions}</th>

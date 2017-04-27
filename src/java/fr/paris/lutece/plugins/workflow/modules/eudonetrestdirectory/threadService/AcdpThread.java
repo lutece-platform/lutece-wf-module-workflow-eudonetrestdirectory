@@ -29,14 +29,13 @@ public class AcdpThread extends Thread
     private boolean _bRunning;
 
     /**
-     * Constructor
+     * constructor
      * 
+     * @param client
      * @param service
-     *            the service
-     * @param request
-     *            the request
-     * @param locale
-     *            the locale
+     * @param listEuData
+     * @param idDirectory
+     * @param idResource
      */
     public AcdpThread( EudonetClient client, EudonetRestWsService service, List<EudonetRestData> listEuData, int idDirectory, int idResource )
     {
@@ -144,7 +143,7 @@ public class AcdpThread extends Thread
     {
         if ( strToken != null )
         {
-            List<Integer> idTableList = getNumberTableListNotLink( );
+            List<Integer> idTableList = getTableListNotLink( strToken );
             for ( Integer i : idTableList )
             {
                 try
@@ -165,34 +164,17 @@ public class AcdpThread extends Thread
                             if ( strFileId != null && !strFileId.isEmpty( ) )
                             {
                                 Integer nFileId = Integer.parseInt( strFileId );
-                                createAnnexes( strToken, nFileId, i );
 
-                                List<Integer> idTableListLink = getNumberTableListLink( i );
+                                if ( isAnnexed( i ) )
+                                    createAnnexes( strToken, nFileId, i );
 
-                                for ( Integer j : idTableListLink )
-                                {
-                                    // createRecordsLink(strToken, j, nFileId );
-                                    EudonetLink eudonetLink = new EudonetLink( );
-                                    eudonetLink.setIdRessource( _nIdResource );
-                                    eudonetLink.setIdField( "" + nFileId );
-                                    eudonetLink.setIdTable( "" + i );
-                                    eudonetLink.setIdTableLink( "" + j );
+                                EudonetLink eudonetLink = new EudonetLink( );
+                                eudonetLink.setIdRessource( _nIdResource );
+                                eudonetLink.setIdField( "" + nFileId );
+                                eudonetLink.setIdTable( "" + i );
+                                eudonetLink.setIdTableLink( "" );
 
-                                    EudonetLinkHome.create( eudonetLink );
-                                }
-                                /*
-                                 * List<Integer> idTableListLink = BuildJsonBodyService.getService( ).isTableLinked(i, _listEuData);
-                                 * if(idTableListLink.size()>0) { for(Integer j: idTableListLink) { EudonetLink eudonetLink = new EudonetLink();
-                                 * eudonetLink.setIdRessource(_nIdResource); eudonetLink.setIdField(strFileId); eudonetLink.setIdTable("" + i);
-                                 * eudonetLink.setIdTableLink("" + j);
-                                 * 
-                                 * EudonetLinkHome.create( eudonetLink ); } } else { EudonetLink eudonetLink = new EudonetLink();
-                                 * eudonetLink.setIdRessource(_nIdResource); eudonetLink.setIdField(strFileId); eudonetLink.setIdTable("" + i);
-                                 * eudonetLink.setIdTableLink("");
-                                 * 
-                                 * EudonetLinkHome.create( eudonetLink ); }
-                                 */
-
+                                EudonetLinkHome.create( eudonetLink );
                             }
                             // String strErrorMessage = jsonObject.getJSONObject( "object" ).getJSONObject( "ResultInfos" ).getString( "ErrorMessage" );
                             AppLogService.info( "Succes Creation - FileId : " + strFileId );
@@ -216,12 +198,15 @@ public class AcdpThread extends Thread
     {
         if ( strToken != null )
         {
-            List<Integer> idTableList = getNumberTableListLink( );
+            List<Integer> idTableList = getTableListLink( strToken );
             for ( Integer i : idTableList )
             {
+                List<Integer> idTableListLinked = getTableListLinked( strToken, i );
+
                 try
                 {
-                    String strJsonBody = BuildJsonBodyService.getService( ).getCreateRecordJsonBodyLink( i, _listEuData, _nIdResource, _nIdDirectory );
+                    String strJsonBody = BuildJsonBodyService.getService( ).getCreateRecordJsonBodyLink( i, _listEuData, _nIdResource, _nIdDirectory,
+                            idTableListLinked );
                     ClientResponse response = _client.createRecord( strToken, "" + i, strJsonBody );
                     if ( response.getStatus( ) == 200 )
                     {
@@ -237,9 +222,11 @@ public class AcdpThread extends Thread
                             if ( strFileId != null && !strFileId.isEmpty( ) )
                             {
                                 Integer nFileId = Integer.parseInt( strFileId );
-                                // createAnnexes(strToken, nFileId, nIdTable);
+
+                                if ( isAnnexed( i ) )
+                                    createAnnexes( strToken, nFileId, i );
                             }
-                            // String strErrorMessage = jsonObject.getJSONObject( "object" ).getJSONObject( "ResultInfos" ).getString( "ErrorMessage" );
+
                             AppLogService.info( "Succes Creation - FileId : " + strFileId );
                         }
                         else
@@ -282,7 +269,7 @@ public class AcdpThread extends Thread
                         if ( strStatus.equals( "true" ) )
                         {
                             String strFileId = jsonObject.getJSONObject( "object" ).getJSONObject( "ResultData" ).getString( "AnnexId" );
-                            // String strErrorMessage = jsonObject.getJSONObject( "object" ).getJSONObject( "ResultInfos" ).getString( "ErrorMessage" );
+
                             AppLogService.info( "Succes Add Annexe - FileId : " + strFileId );
                         }
                         else
@@ -300,7 +287,7 @@ public class AcdpThread extends Thread
         }
     }
 
-    public List<Integer> getNumberTableListDistinct( )
+    public List<Integer> getTableListDistinct( )
     {
         List<Integer> idTableList = new ArrayList<Integer>( );
         for ( EudonetRestData eudonetRestData : _listEuData )
@@ -319,19 +306,50 @@ public class AcdpThread extends Thread
         return idTableList;
     }
 
-    public List<Integer> getNumberTableListNotLink( )
+    public boolean isAnnexed( Integer nIdTable )
     {
-        List<Integer> idTableList = getNumberTableListDistinct( );
         for ( EudonetRestData eudonetRestData : _listEuData )
         {
-            String strIdTable = eudonetRestData.getIdTable( ).split( "-" ) [0];
             String strIdTableLink = eudonetRestData.getIdTableLink( ).split( "-" ) [0];
-            if ( !strIdTable.isEmpty( ) )
+            if ( !strIdTableLink.isEmpty( ) && strIdTableLink.equals( "" + nIdTable ) )
             {
-                Integer nIdTable = Integer.parseInt( strIdTable );
-                if ( idTableList.contains( nIdTable ) && !strIdTableLink.isEmpty( ) )
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public List<Integer> getTableListNotLink( String strToken )
+    {
+        List<Integer> idTableListDistinct = getTableListDistinct( );
+        List<Integer> idTableList = new ArrayList<Integer>( );
+        for ( Integer idTable : idTableListDistinct )
+        {
+            String strBody = BuildJsonBodyService.getService( ).getMetaInfosJsonBody( "" + idTable );
+            if ( strBody != null )
+            {
+                ClientResponse response = _client.getAttributListMetaInfos( strToken, strBody );
+                if ( response.getStatus( ) == 200 )
                 {
-                    idTableList.remove( nIdTable );
+                    String strResponse = response.getEntity( String.class );
+                    JSONObject jsonObject = new JSONObject( );
+                    jsonObject.accumulate( "object", strResponse );
+                    String strStatus = jsonObject.getJSONObject( "object" ).getJSONObject( "ResultInfos" ).getString( "Success" );
+                    if ( strStatus.equals( "true" ) )
+                    {
+                        JSONArray jsonArray = jsonObject.getJSONObject( "object" ).getJSONObject( "ResultMetaData" ).getJSONArray( "Tables" ).getJSONObject( 0 )
+                                .getJSONArray( "Links" );
+                        if ( jsonArray.size( ) == 0 && idTableListDistinct.contains( idTable ) )
+                        {
+                            idTableList.add( idTable );
+                        }
+                    }
+                    else
+                    {
+                        String strErrorMessage = jsonObject.getJSONObject( "object" ).getJSONObject( "ResultInfos" ).getString( "ErrorMessage" );
+                        AppLogService.error( "Error Eudonet : " + strErrorMessage );
+                    }
                 }
             }
         }
@@ -339,10 +357,43 @@ public class AcdpThread extends Thread
         return idTableList;
     }
 
-    public List<Integer> getNumberTableListLink( )
+    public List<Integer> getTableListLinked( String strToken, Integer nIdTable )
     {
-        List<Integer> idTableListDistinct = getNumberTableListDistinct( );
-        List<Integer> idTableListNotLink = getNumberTableListNotLink( );
+        List<Integer> idTableList = new ArrayList<Integer>( );
+        String strBody = BuildJsonBodyService.getService( ).getMetaInfosJsonBody( "" + nIdTable );
+        if ( strBody != null )
+        {
+            ClientResponse response = _client.getAttributListMetaInfos( strToken, strBody );
+            if ( response.getStatus( ) == 200 )
+            {
+                String strResponse = response.getEntity( String.class );
+                JSONObject jsonObject = new JSONObject( );
+                jsonObject.accumulate( "object", strResponse );
+                String strStatus = jsonObject.getJSONObject( "object" ).getJSONObject( "ResultInfos" ).getString( "Success" );
+                if ( strStatus.equals( "true" ) )
+                {
+                    JSONArray jsonArray = jsonObject.getJSONObject( "object" ).getJSONObject( "ResultMetaData" ).getJSONArray( "Tables" ).getJSONObject( 0 )
+                            .getJSONArray( "Links" );
+                    for ( int i = 0; i < jsonArray.size( ); i++ )
+                    {
+                        idTableList.add( jsonArray.getInt( i ) );
+                    }
+                }
+                else
+                {
+                    String strErrorMessage = jsonObject.getJSONObject( "object" ).getJSONObject( "ResultInfos" ).getString( "ErrorMessage" );
+                    AppLogService.error( "Error Eudonet : " + strErrorMessage );
+                }
+            }
+        }
+
+        return idTableList;
+    }
+
+    public List<Integer> getTableListLink( String strToken )
+    {
+        List<Integer> idTableListDistinct = getTableListDistinct( );
+        List<Integer> idTableListNotLink = getTableListNotLink( strToken );
         for ( Integer i : idTableListNotLink )
         {
             if ( idTableListDistinct.contains( i ) )
@@ -353,24 +404,4 @@ public class AcdpThread extends Thread
 
         return idTableListDistinct;
     }
-
-    public List<Integer> getNumberTableListLink( Integer idTable )
-    {
-        List<Integer> idTableList = getNumberTableListLink( );
-        for ( EudonetRestData eudonetRestData : _listEuData )
-        {
-            String strIdTableLink = eudonetRestData.getIdTableLink( ).split( "-" ) [0];
-            if ( !strIdTableLink.isEmpty( ) )
-            {
-                Integer nIdTableLink = Integer.parseInt( strIdTableLink );
-                if ( idTableList.contains( nIdTableLink ) && !nIdTableLink.equals( idTable ) )
-                {
-                    idTableList.remove( nIdTableLink );
-                }
-            }
-        }
-
-        return idTableList;
-    }
-
 }

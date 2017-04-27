@@ -101,21 +101,6 @@ public class TaskExportDemand extends SimpleTask
         List<EudonetRestData> eudonetCollection = TaskEudonetRestConfigHome.selectEntry( taskEudonetConfig.getIdTask( ) );
         taskEudonetConfig.setEntry( eudonetCollection );
 
-        /*
-         * IWorkflowService workflowService = SpringContextService.getBean( WorkflowService.BEAN_SERVICE ); IStateService stateService =
-         * SpringContextService.getBean( StateService.BEAN_SERVICE ); IActionService actionService = SpringContextService.getBean( ActionService.BEAN_SERVICE );
-         * 
-         * ActionFilter filter = new ActionFilter( ); filter.setIdWorkflow(resourceHistory.getWorkflow().getId());
-         * 
-         * List<Action> listActions = actionService.getListActionByFilter( filter );
-         * 
-         * for ( Action action : listActions ) { State stateAfter = stateService.findByPrimaryKey( action.getStateAfter( ).getId( ) ); State stateBefore =
-         * stateService.findByPrimaryKey( action.getStateBefore( ).getId( ) ); State state = stateService.findByPrimaryKey( 3 ); if(stateAfter.getName(
-         * ).equals("et2")) {
-         * 
-         * } }
-         */
-
         try
         {
             _eudonetService = EudonetRestWsEudonetRest.getInstance( );

@@ -30,7 +30,16 @@ public interface IEudonetLinkDAO
      * @param plugin
      *            the Plugin
      */
-    List<EudonetLink> loadAll( int nIdEudonetLink );
+    EudonetLink loadBy( int nIdRessource, int nIdTable );
+
+    /**
+     * load a record in the table.
+     * 
+     * @param nIdEudonetLink
+     * @param plugin
+     *            the Plugin
+     */
+    List<EudonetLink> loadAll( int nIdRessource, int nIdTable );
 
     /**
      * Update the record in the table

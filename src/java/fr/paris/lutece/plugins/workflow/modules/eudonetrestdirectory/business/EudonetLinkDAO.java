@@ -9,7 +9,8 @@ import fr.paris.lutece.util.sql.DAOUtil;
 
 public class EudonetLinkDAO implements IEudonetLinkDAO
 {
-    private static final String SQL_QUERY_SELECT_ALL = "SELECT id, id_ressource, id_field, id_table, id_table_link FROM task_eudonetrest_table_link WHERE id_table_link = ? ;";
+    private static final String SQL_QUERY_SELECT_ALL = "SELECT id, id_ressource, id_field, id_table, id_table_link FROM task_eudonetrest_table_link WHERE id_ressource = ? AND id_table = ? ;";
+    private static final String SQL_QUERY_SELECT_BY = "SELECT id, id_ressource, id_field, id_table, id_table_link FROM task_eudonetrest_table_link WHERE id_ressource = ? AND id_table = ? ;";
     private static final String SQL_QUERY_SELECT = "SELECT id, id_ressource, id_field, id_table, id_table_link FROM task_eudonetrest_table_link WHERE id = ? ;";
     private static final String SQL_QUERY_INSERT = "INSERT INTO task_eudonetrest_table_link ( id, id_ressource, id_field, id_table, id_table_link ) VALUES ( ?, ?, ?, ?, ? );";
     private static final String SQL_QUERY_DELETE = "DELETE FROM task_eudonetrest_table_link WHERE id_task = ? ;";
@@ -108,12 +109,13 @@ public class EudonetLinkDAO implements IEudonetLinkDAO
     }
 
     @Override
-    public List<EudonetLink> loadAll( int nIdEudonetLink )
+    public List<EudonetLink> loadAll( int nIdRessource, int nIdTable )
     {
         List<EudonetLink> eudonetLinkList = new ArrayList<EudonetLink>( );
 
         DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_ALL, EudonetRestDirectoryPlugin.getPlugin( ) );
-        daoUtil.setInt( 1, nIdEudonetLink );
+        daoUtil.setInt( 1, nIdRessource );
+        daoUtil.setInt( 2, nIdTable );
         daoUtil.executeQuery( );
 
         while ( daoUtil.next( ) )
@@ -128,6 +130,36 @@ public class EudonetLinkDAO implements IEudonetLinkDAO
             eudonetLinkList.add( eudonetLink );
         }
 
+        daoUtil.free( );
+
         return eudonetLinkList;
+    }
+
+    @Override
+    public EudonetLink loadBy( int nIdRessource, int nIdTable )
+    {
+        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_BY, EudonetRestDirectoryPlugin.getPlugin( ) );
+        daoUtil.setInt( 1, nIdRessource );
+        daoUtil.setInt( 2, nIdTable );
+        daoUtil.executeQuery( );
+
+        if ( daoUtil.next( ) )
+        {
+            EudonetLink eudonetLink = new EudonetLink( );
+            eudonetLink.setId( daoUtil.getInt( 1 ) );
+            eudonetLink.setIdRessource( daoUtil.getInt( 2 ) );
+            eudonetLink.setIdField( daoUtil.getString( 3 ) );
+            eudonetLink.setIdTable( daoUtil.getString( 4 ) );
+            eudonetLink.setIdTableLink( daoUtil.getString( 5 ) );
+
+            daoUtil.free( );
+
+            return eudonetLink;
+        }
+        else
+        {
+            daoUtil.free( );
+            return null;
+        }
     }
 }

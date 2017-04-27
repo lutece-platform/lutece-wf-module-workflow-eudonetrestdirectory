@@ -39,7 +39,6 @@ public final class EudonetLinkHome
     }
 
     /**
-     * load a EudonetLink
      * 
      * @param nIdEudonetLink
      * @return
@@ -50,14 +49,25 @@ public final class EudonetLinkHome
     }
 
     /**
-     * load a EudonetLink
      * 
-     * @param nIdEudonetLink
+     * @param nIdRessource
+     * @param nIdTable
      * @return
      */
-    public static List<EudonetLink> findAll( int nIdEudonetLink )
+    public static List<EudonetLink> findAll( int nIdRessource, int nIdTable )
     {
-        return _dao.loadAll( nIdEudonetLink );
+        return _dao.loadAll( nIdRessource, nIdTable );
+    }
+
+    /**
+     * 
+     * @param nIdRessource
+     * @param nIdTable
+     * @return
+     */
+    public static EudonetLink findBy( int nIdRessource, int nIdTable )
+    {
+        return _dao.loadBy( nIdRessource, nIdTable );
     }
 
 }

@@ -209,7 +209,6 @@ public class EudonetRestTaskComponent extends NoFormTaskComponent
     {
         Map<String, Object> model = new HashMap<String, Object>( );
         String strIdTask = request.getParameter( EudonetRestDirctoryConstants.PARAMETER_ID_TASK );
-        // TaskEudonetRestConfig taskEudonetConfig = null;
 
         int nIdDirectory;
 
