@@ -114,17 +114,21 @@ public class BuildJsonBodyService
                 }
             }
 
-            if ( ( entry.getEntryType( ).getIdType( ) == AppPropertiesService.getPropertyInt( PROPERTY_ENTRY_TYPE_IMAGE, 10 ) )
-                    || ( entry.getEntryType( ).getIdType( ) == 8 ) )
+            /*
+             * if ( ( entry.getEntryType( ).getIdType( ) == AppPropertiesService.getPropertyInt( PROPERTY_ENTRY_TYPE_IMAGE, 10 ) ) || ( entry.getEntryType(
+             * ).getIdType( ) == 8 ) ) { if ( listRecordFields.size( ) >= 1 ) { return AppPathService.getProdUrl( ) +
+             * "/jsp/site/plugins/directory/DoDownloadFile.jsp?id_file=" + listRecordFields.get( 0 ).getFile( ).getIdFile( ); } else { return StringUtils.EMPTY;
+             * } }
+             */
+
+            if ( entry.getEntryType( ).getIdType( ) == 8 )
             {
-                if ( listRecordFields.size( ) >= 1 )
+                RecordField recordFieldIdDemand = listRecordFields.get( 0 );
+                strRecordFieldValue = recordFieldIdDemand.getValue( );
+
+                if ( recordFieldIdDemand.getEntry( ) != null )
                 {
-                    return AppPathService.getProdUrl( ) + "/jsp/site/plugins/directory/DoDownloadFile.jsp?id_file="
-                            + listRecordFields.get( 0 ).getFile( ).getIdFile( );
-                }
-                else
-                {
-                    return StringUtils.EMPTY;
+                    return recordFieldIdDemand.getEntry( ).getTitle( );
                 }
             }
 
@@ -247,7 +251,7 @@ public class BuildJsonBodyService
         {
             String strIdTable = entry.getIdTable( ).split( "-" ) [0];
 
-            if ( strIdTable.equals( "" + nIdTable ) && entry.getOrderEntry( ) != -1 )
+            if ( strIdTable.equals( "" + nIdTable ) )
             {
                 String strIdAtt = entry.getIdAttribut( ).split( "-" ) [0];
                 JSONObject jsonObject = new JSONObject( );
@@ -272,9 +276,8 @@ public class BuildJsonBodyService
         for ( EudonetRestData entry : _entries )
         {
             String strIdTable = entry.getIdTable( ).split( "-" ) [0];
-            String strIdTableLink = entry.getIdTableLink( ).split( "-" ) [0];
 
-            if ( strIdTable.equals( "" + nIdTable ) && strIdTableLink.isEmpty( ) )
+            if ( strIdTable.equals( "" + nIdTable ) )
             {
                 String strIdAtt = entry.getIdAttribut( ).split( "-" ) [0];
                 JSONObject jsonObject = new JSONObject( );
@@ -302,14 +305,15 @@ public class BuildJsonBodyService
         return jsonObjectFinal.toString( );
     }
 
-    public JSONArray getCreateAnnexeJsonBody( int nIdFile, int nIdTableLink, List<EudonetRestData> _entries, int nIdRessource, int nIdDirectory )
+    public JSONArray getCreateAnnexeJsonBody( int nIdFile, int nIdTable, List<EudonetRestData> _entries, int nIdRessource, int nIdDirectory )
     {
         JSONArray jsonArray = new JSONArray( );
 
         for ( EudonetRestData entry : _entries )
         {
             String strIdTableLink = entry.getIdTableLink( ).split( "-" ) [0];
-            if ( strIdTableLink.equals( "" + nIdTableLink ) )
+            String strIdTable = entry.getIdTable( ).split( "-" ) [0];
+            if ( !strIdTableLink.isEmpty( ) && strIdTable.equals( "" + nIdTable ) )
             {
                 File file = getRecordFileValue( entry.getOrderEntry( ), nIdRessource, nIdDirectory );
                 if ( file != null )
@@ -326,7 +330,7 @@ public class BuildJsonBodyService
 
                     JSONObject jsonObject = new JSONObject( );
                     jsonObject.accumulate( "FileId", nIdFile );
-                    jsonObject.accumulate( "TabId", nIdTableLink );
+                    jsonObject.accumulate( "TabId", nIdTable );
                     jsonObject.accumulate( "FileName", strFileName );
                     jsonObject.accumulate( "Content", strContent );
                     jsonObject.accumulate( "IsUrl", false );

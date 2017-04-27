@@ -245,14 +245,13 @@ public class AcdpThread extends Thread
         }
     }
 
-    public void createAnnexes( String strToken, int nIdFile, int nIdTableLink )
+    public void createAnnexes( String strToken, int nIdFile, int nIdTable )
     {
         if ( strToken != null )
         {
             try
             {
-                JSONArray jSONArray = BuildJsonBodyService.getService( ).getCreateAnnexeJsonBody( nIdFile, nIdTableLink, _listEuData, _nIdResource,
-                        _nIdDirectory );
+                JSONArray jSONArray = BuildJsonBodyService.getService( ).getCreateAnnexeJsonBody( nIdFile, nIdTable, _listEuData, _nIdResource, _nIdDirectory );
                 for ( int index = 0; index < jSONArray.size( ); index++ )
                 {
                     JSONObject jObject = jSONArray.getJSONObject( index );
@@ -282,7 +281,7 @@ public class AcdpThread extends Thread
             }
             catch( Exception ex )
             {
-                AppLogService.error( "Erreur to create table : " + nIdTableLink, ex );
+                AppLogService.error( "Erreur to create table : " + nIdTable, ex );
             }
         }
     }
@@ -311,7 +310,8 @@ public class AcdpThread extends Thread
         for ( EudonetRestData eudonetRestData : _listEuData )
         {
             String strIdTableLink = eudonetRestData.getIdTableLink( ).split( "-" ) [0];
-            if ( !strIdTableLink.isEmpty( ) && strIdTableLink.equals( "" + nIdTable ) )
+            String strIdTable = eudonetRestData.getIdTable( ).split( "-" ) [0];
+            if ( !strIdTableLink.isEmpty( ) && strIdTable.equals( "" + nIdTable ) )
             {
                 return true;
             }
