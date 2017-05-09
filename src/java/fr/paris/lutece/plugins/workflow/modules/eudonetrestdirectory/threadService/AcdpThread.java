@@ -8,6 +8,12 @@ import net.sf.json.JSONObject;
 
 import com.sun.jersey.api.client.ClientResponse;
 
+import fr.paris.lutece.plugins.directory.business.Record;
+import fr.paris.lutece.plugins.directory.business.RecordHome;
+import fr.paris.lutece.plugins.directory.service.DirectoryPlugin;
+import fr.paris.lutece.plugins.gfa.business.GfaResourceDTO;
+import fr.paris.lutece.plugins.gfa.business.service.IProcessTaskErrorService;
+import fr.paris.lutece.plugins.gfa.business.service.ProcessTaskErrorService;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.EudonetLink;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.EudonetLinkHome;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.EudonetRestData;
@@ -15,18 +21,26 @@ import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.service.Bui
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.service.EudonetClient;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.service.EudonetRestWsService;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.utils.EudonetRestException;
+import fr.paris.lutece.plugins.workflowcore.business.resource.ResourceHistory;
+import fr.paris.lutece.portal.service.plugin.Plugin;
+import fr.paris.lutece.portal.service.plugin.PluginService;
 import fr.paris.lutece.portal.service.util.AppLogService;
 
 public class AcdpThread extends Thread
 {
     private static final String THREAD_NAME = "eudonetRest-export-Acdp-thread";
+    private static final String ACTION = "ACDP ACTION";
+
     private EudonetClient _client;
     private EudonetRestWsService _eudonetRestWsService;
     private List<EudonetRestData> _listEuData;
     private int _nIdResource;
     private int _nIdDirectory;
+    private int _nIdAction;
     private EudonetRestException _eudonetException;
     private boolean _bRunning;
+
+    IProcessTaskErrorService _erroService = ProcessTaskErrorService.getService( );
 
     /**
      * constructor
@@ -37,13 +51,14 @@ public class AcdpThread extends Thread
      * @param idDirectory
      * @param idResource
      */
-    public AcdpThread( EudonetClient client, EudonetRestWsService service, List<EudonetRestData> listEuData, int idDirectory, int idResource )
+    public AcdpThread( EudonetClient client, EudonetRestWsService service, List<EudonetRestData> listEuData, int idDirectory, int idResource, int idAction )
     {
         _client = client;
         _eudonetRestWsService = service;
         _listEuData = listEuData;
         _nIdResource = idResource;
         _nIdDirectory = idDirectory;
+        _nIdAction = idAction;
         setName( THREAD_NAME + _nIdResource );
     }
 
@@ -53,6 +68,17 @@ public class AcdpThread extends Thread
     @Override
     public void run( )
     {
+        boolean bError = false;
+        boolean bErrorRecord = false;
+        boolean bErrorRecordLink = false;
+
+        Plugin pluginDirectory = PluginService.getPlugin( DirectoryPlugin.PLUGIN_NAME );
+
+        Record record = RecordHome.findByPrimaryKey( _nIdResource, pluginDirectory );
+
+        GfaResourceDTO gfaResourceDTO = getGfaResourceDTO( );
+        fr.paris.lutece.plugins.gfa.business.Error error = gfaResourceDTO.getError( ).get( 0 );
+
         try
         {
             _bRunning = true;
@@ -62,12 +88,16 @@ public class AcdpThread extends Thread
 
             if ( strToken != null )
             {
-                createRecords( strToken );
-                createRecordsLink( strToken );
+                createRecords( strToken, bErrorRecord );
+                createRecordsLink( strToken, bErrorRecordLink );
+
+                bError = bErrorRecord && bErrorRecordLink;
             }
             else
             {
                 AppLogService.error( "Erreur d'authentification sur eudonet" );
+                bError = true;
+                error.setError( "Erreur d'authentification sur eudonet" );
             }
 
         }
@@ -75,6 +105,17 @@ public class AcdpThread extends Thread
         {
             AppLogService.error( "error calling addProjectsInEudonet method : " + ex.getMessage( ), ex );
             _bRunning = false;
+            bError = true;
+            error.setError( "error calling addProjectsInEudonet method : " + ex.getMessage( ) );
+        }
+
+        if ( bError )
+        {
+            _erroService.saveErrorTrace( gfaResourceDTO );
+        }
+        else
+        {
+            _erroService.deleteErrorTrace( record.getIdRecord( ) );
         }
 
         _bRunning = false;
@@ -139,7 +180,7 @@ public class AcdpThread extends Thread
         return null;
     }
 
-    public void createRecords( String strToken )
+    public void createRecords( String strToken, boolean bError )
     {
         if ( strToken != null )
         {
@@ -166,7 +207,7 @@ public class AcdpThread extends Thread
                                 Integer nFileId = Integer.parseInt( strFileId );
 
                                 if ( isAnnexed( i ) )
-                                    createAnnexes( strToken, nFileId, i );
+                                    createAnnexes( strToken, nFileId, i, bError );
 
                                 EudonetLink eudonetLink = new EudonetLink( );
                                 eudonetLink.setIdRessource( _nIdResource );
@@ -183,18 +224,20 @@ public class AcdpThread extends Thread
                         {
                             String strErrorMessage = jsonObject.getJSONObject( "object" ).getJSONObject( "ResultInfos" ).getString( "ErrorMessage" );
                             AppLogService.error( "Error Eudonet : " + strErrorMessage );
+                            bError = true;
                         }
                     }
                 }
                 catch( Exception ex )
                 {
                     AppLogService.error( "Erreur to create table : " + i, ex );
+                    bError = true;
                 }
             }
         }
     }
 
-    public void createRecordsLink( String strToken )
+    public void createRecordsLink( String strToken, boolean bError )
     {
         if ( strToken != null )
         {
@@ -224,7 +267,7 @@ public class AcdpThread extends Thread
                                 Integer nFileId = Integer.parseInt( strFileId );
 
                                 if ( isAnnexed( i ) )
-                                    createAnnexes( strToken, nFileId, i );
+                                    createAnnexes( strToken, nFileId, i, bError );
                             }
 
                             AppLogService.info( "Succes Creation - FileId : " + strFileId );
@@ -233,19 +276,21 @@ public class AcdpThread extends Thread
                         {
                             String strErrorMessage = jsonObject.getJSONObject( "object" ).getJSONObject( "ResultInfos" ).getString( "ErrorMessage" );
                             AppLogService.error( "Error Eudonet : " + strErrorMessage );
+                            bError = true;
                         }
                     }
                 }
                 catch( Exception ex )
                 {
                     AppLogService.error( "Erreur to create table : " + i, ex );
+                    bError = true;
                 }
             }
 
         }
     }
 
-    public void createAnnexes( String strToken, int nIdFile, int nIdTable )
+    public void createAnnexes( String strToken, int nIdFile, int nIdTable, boolean bError )
     {
         if ( strToken != null )
         {
@@ -275,6 +320,7 @@ public class AcdpThread extends Thread
                         {
                             String strErrorMessage = jsonObject.getJSONObject( "object" ).getJSONObject( "ResultInfos" ).getString( "ErrorMessage" );
                             AppLogService.error( "Error Eudonet : adding Annexe " + strErrorMessage );
+                            bError = true;
                         }
                     }
                 }
@@ -282,6 +328,7 @@ public class AcdpThread extends Thread
             catch( Exception ex )
             {
                 AppLogService.error( "Erreur to create table : " + nIdTable, ex );
+                bError = true;
             }
         }
     }
@@ -403,5 +450,29 @@ public class AcdpThread extends Thread
         }
 
         return idTableListDistinct;
+    }
+
+    public GfaResourceDTO getGfaResourceDTO( )
+    {
+        Plugin pluginDirectory = PluginService.getPlugin( DirectoryPlugin.PLUGIN_NAME );
+
+        Record record = RecordHome.findByPrimaryKey( _nIdResource, pluginDirectory );
+
+        GfaResourceDTO gfaResourceDTO = new GfaResourceDTO( );
+        gfaResourceDTO.setIdGfaResource( record.getIdRecord( ) );
+        gfaResourceDTO.setIdGfaProvider( Integer.parseInt( record.getDirectory( ).getIdDirectory( ) + "" ) );
+        gfaResourceDTO.setAction( _nIdAction );
+        gfaResourceDTO.setDescription( ACTION );
+        gfaResourceDTO.setStatus( GfaResourceDTO.STATUS_KO );
+
+        List<fr.paris.lutece.plugins.gfa.business.Error> listError = new ArrayList<fr.paris.lutece.plugins.gfa.business.Error>( );
+        fr.paris.lutece.plugins.gfa.business.Error error = new fr.paris.lutece.plugins.gfa.business.Error( );
+        java.sql.Timestamp date = new java.sql.Timestamp( System.currentTimeMillis( ) );
+        error.setDateError( date );
+        error.setAction( ACTION );
+        listError.add( error );
+        gfaResourceDTO.setError( listError );
+
+        return gfaResourceDTO;
     }
 }

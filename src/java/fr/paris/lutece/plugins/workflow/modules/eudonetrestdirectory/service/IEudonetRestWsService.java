@@ -58,7 +58,7 @@ public interface IEudonetRestWsService
      * @param idResource
      * @throws EudonetRestException
      */
-    public void exportDemand( int idResource ) throws EudonetRestException;
+    public void exportDemand( int idResource, int idaction ) throws EudonetRestException;
 
     /**
      * Update Demands In eudonet

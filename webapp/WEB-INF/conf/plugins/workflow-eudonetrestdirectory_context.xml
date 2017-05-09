@@ -40,4 +40,3 @@
 	<bean id="workflow-eudonetrestdirectory.eudonetRestWsService" class="fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.service.EudonetRestWsService"></bean>
     
 </beans>
- 	

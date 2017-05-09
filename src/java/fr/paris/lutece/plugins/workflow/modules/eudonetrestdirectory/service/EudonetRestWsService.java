@@ -46,9 +46,9 @@ public class EudonetRestWsService implements IEudonetRestWsService
     }
 
     @Override
-    public void exportDemand( int idResource ) throws EudonetRestException
+    public void exportDemand( int idResource, int idAction ) throws EudonetRestException
     {
-        _acdpThread = new AcdpThread( _client, this, _config.getEntry( ), _config.getIdDirectory( ), idResource );
+        _acdpThread = new AcdpThread( _client, this, _config.getEntry( ), _config.getIdDirectory( ), idResource, idAction );
 
         _acdpThread.setRuning( true );
         _acdpThread.start( );
