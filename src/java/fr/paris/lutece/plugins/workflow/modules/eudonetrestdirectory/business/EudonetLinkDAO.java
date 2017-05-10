@@ -9,11 +9,13 @@ import fr.paris.lutece.util.sql.DAOUtil;
 
 public class EudonetLinkDAO implements IEudonetLinkDAO
 {
-    private static final String SQL_QUERY_SELECT_ALL = "SELECT id, id_ressource, id_field, id_table, id_table_link FROM task_eudonetrest_table_link WHERE id_ressource = ? AND id_table = ? ;";
+    private static final String SQL_QUERY_SELECT_ALL_BY_RESOURCE_TABLE = "SELECT id, id_ressource, id_field, id_table, id_table_link FROM task_eudonetrest_table_link WHERE id_ressource = ? AND id_table = ? ;";
+    private static final String SQL_QUERY_SELECT_ALL = "SELECT id, id_ressource, id_field, id_table, id_table_link FROM task_eudonetrest_table_link ;";
+    private static final String SQL_QUERY_SELECT_ALL_BY_RESOURCE = "SELECT id, id_ressource, id_field, id_table, id_table_link FROM task_eudonetrest_table_link WHERE id_ressource = ? ;";
     private static final String SQL_QUERY_SELECT_BY = "SELECT id, id_ressource, id_field, id_table, id_table_link FROM task_eudonetrest_table_link WHERE id_ressource = ? AND id_table = ? ;";
     private static final String SQL_QUERY_SELECT = "SELECT id, id_ressource, id_field, id_table, id_table_link FROM task_eudonetrest_table_link WHERE id = ? ;";
     private static final String SQL_QUERY_INSERT = "INSERT INTO task_eudonetrest_table_link ( id, id_ressource, id_field, id_table, id_table_link ) VALUES ( ?, ?, ?, ?, ? );";
-    private static final String SQL_QUERY_DELETE = "DELETE FROM task_eudonetrest_table_link WHERE id_task = ? ;";
+    private static final String SQL_QUERY_DELETE = "DELETE FROM task_eudonetrest_table_link WHERE id = ? ;";
     private static final String SQL_QUERY_UPDATE = "UPDATE task_eudonetrest_table_link SET id_ressource=?, id_field=?, id_table=?, id_table_link=? WHERE id = ? ;";
     private static final String SQL_QUERY_NEW_PK_PARAM = "SELECT max( id ) FROM task_eudonetrest_table_link";
 
@@ -113,9 +115,60 @@ public class EudonetLinkDAO implements IEudonetLinkDAO
     {
         List<EudonetLink> eudonetLinkList = new ArrayList<EudonetLink>( );
 
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_ALL, EudonetRestDirectoryPlugin.getPlugin( ) );
+        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_ALL_BY_RESOURCE_TABLE, EudonetRestDirectoryPlugin.getPlugin( ) );
         daoUtil.setInt( 1, nIdRessource );
         daoUtil.setInt( 2, nIdTable );
+        daoUtil.executeQuery( );
+
+        while ( daoUtil.next( ) )
+        {
+            EudonetLink eudonetLink = new EudonetLink( );
+            eudonetLink.setId( daoUtil.getInt( 1 ) );
+            eudonetLink.setIdRessource( daoUtil.getInt( 2 ) );
+            eudonetLink.setIdField( daoUtil.getString( 3 ) );
+            eudonetLink.setIdTable( daoUtil.getString( 4 ) );
+            eudonetLink.setIdTableLink( daoUtil.getString( 5 ) );
+
+            eudonetLinkList.add( eudonetLink );
+        }
+
+        daoUtil.free( );
+
+        return eudonetLinkList;
+    }
+
+    @Override
+    public List<EudonetLink> loadAll( int nIdRessource )
+    {
+        List<EudonetLink> eudonetLinkList = new ArrayList<EudonetLink>( );
+
+        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_ALL_BY_RESOURCE, EudonetRestDirectoryPlugin.getPlugin( ) );
+        daoUtil.setInt( 1, nIdRessource );
+        daoUtil.executeQuery( );
+
+        while ( daoUtil.next( ) )
+        {
+            EudonetLink eudonetLink = new EudonetLink( );
+            eudonetLink.setId( daoUtil.getInt( 1 ) );
+            eudonetLink.setIdRessource( daoUtil.getInt( 2 ) );
+            eudonetLink.setIdField( daoUtil.getString( 3 ) );
+            eudonetLink.setIdTable( daoUtil.getString( 4 ) );
+            eudonetLink.setIdTableLink( daoUtil.getString( 5 ) );
+
+            eudonetLinkList.add( eudonetLink );
+        }
+
+        daoUtil.free( );
+
+        return eudonetLinkList;
+    }
+
+    @Override
+    public List<EudonetLink> loadAll( )
+    {
+        List<EudonetLink> eudonetLinkList = new ArrayList<EudonetLink>( );
+
+        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_ALL, EudonetRestDirectoryPlugin.getPlugin( ) );
         daoUtil.executeQuery( );
 
         while ( daoUtil.next( ) )

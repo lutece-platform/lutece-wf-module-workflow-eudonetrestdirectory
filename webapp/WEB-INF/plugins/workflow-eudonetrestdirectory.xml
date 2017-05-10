@@ -19,5 +19,14 @@
 	
 	<!-- if the plugin must have a connection pool with parameter : 1 - yes, 0 - no -->	
     <db-pool-required>1</db-pool-required>
+    
+    <daemons>
+        <daemon>
+            <daemon-id>purgeResourceDaemon</daemon-id>
+            <daemon-name>module.workflow.eudonetrestdirectory.daemon.purgeResourceDaemon.name</daemon-name>
+            <daemon-description>module.workflow.eudonetrestdirectory.daemon.purgeResourceDaemon.description</daemon-description>
+            <daemon-class>fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.service.daemon.PurgeResourceDaemon</daemon-class>
+        </daemon>
+    </daemons>
 
 </plug-in>

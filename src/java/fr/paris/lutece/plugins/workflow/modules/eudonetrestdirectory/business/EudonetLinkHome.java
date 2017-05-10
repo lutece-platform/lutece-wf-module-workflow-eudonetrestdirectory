@@ -62,6 +62,25 @@ public final class EudonetLinkHome
     /**
      * 
      * @param nIdRessource
+     * @return
+     */
+    public static List<EudonetLink> findAll( int nIdRessource )
+    {
+        return _dao.loadAll( nIdRessource );
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public static List<EudonetLink> findAll( )
+    {
+        return _dao.loadAll( );
+    }
+
+    /**
+     * 
+     * @param nIdRessource
      * @param nIdTable
      * @return
      */

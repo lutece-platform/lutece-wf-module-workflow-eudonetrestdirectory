@@ -42,6 +42,19 @@ public interface IEudonetLinkDAO
     List<EudonetLink> loadAll( int nIdRessource, int nIdTable );
 
     /**
+     * 
+     * @param nIdRessource
+     * @return
+     */
+    List<EudonetLink> loadAll( int nIdRessource );
+
+    /**
+     * 
+     * @return
+     */
+    List<EudonetLink> loadAll( );
+
+    /**
      * Update the record in the table
      * 
      * @param eudonetLink
