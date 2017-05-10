@@ -2,7 +2,6 @@ package fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.service;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,7 +30,6 @@ import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.Eu
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.EudonetRestData;
 import fr.paris.lutece.portal.service.plugin.Plugin;
 import fr.paris.lutece.portal.service.plugin.PluginService;
-import fr.paris.lutece.portal.service.util.AppPathService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
 
 public class BuildJsonBodyService
@@ -39,6 +37,10 @@ public class BuildJsonBodyService
     private static BuildJsonBodyService _singleton;
     private static final String PROPERTY_ENTRY_TYPE_GEOLOCATION = "directory.entry_type.geolocation";
     private static final String PROPERTY_ENTRY_TYPE_IMAGE = "directory.resource_rss.entry_type_image";
+
+    // Constants
+    private static final int CONSTANT_ENTRY_DATE_CREATION = -2;
+    private static final int CONSTANT_ENTRY_DATE_MODIFICATION = -3;
 
     /**
      * The plugin directory.
@@ -91,6 +93,18 @@ public class BuildJsonBodyService
         String strRecordFieldValue = StringUtils.EMPTY;
         Plugin pluginDirectory = PluginService.getPlugin( DirectoryPlugin.PLUGIN_NAME );
 
+        if ( nIdEntry == CONSTANT_ENTRY_DATE_CREATION || nIdEntry == CONSTANT_ENTRY_DATE_MODIFICATION )
+        {
+            if ( nIdEntry == CONSTANT_ENTRY_DATE_CREATION )
+            {
+                return getDateCreation( nIdRecord );
+            }
+            else
+            {
+                return getDateModification( nIdRecord );
+            }
+        }
+
         IEntry entry = EntryHome.findByPrimaryKey( nIdEntry, pluginDirectory );
 
         if ( ( entry != null ) )
@@ -113,13 +127,6 @@ public class BuildJsonBodyService
                     return StringUtils.EMPTY;
                 }
             }
-
-            /*
-             * if ( ( entry.getEntryType( ).getIdType( ) == AppPropertiesService.getPropertyInt( PROPERTY_ENTRY_TYPE_IMAGE, 10 ) ) || ( entry.getEntryType(
-             * ).getIdType( ) == 8 ) ) { if ( listRecordFields.size( ) >= 1 ) { return AppPathService.getProdUrl( ) +
-             * "/jsp/site/plugins/directory/DoDownloadFile.jsp?id_file=" + listRecordFields.get( 0 ).getFile( ).getIdFile( ); } else { return StringUtils.EMPTY;
-             * } }
-             */
 
             if ( entry.getEntryType( ).getIdType( ) == 8 )
             {
@@ -240,6 +247,42 @@ public class BuildJsonBodyService
         }
 
         return null;
+    }
+
+    private String getDateCreation( int nIdRecord )
+    {
+        Plugin pluginDirectory = PluginService.getPlugin( DirectoryPlugin.PLUGIN_NAME );
+
+        Record record = RecordHome.findByPrimaryKey( nIdRecord, pluginDirectory );
+        if ( record != null )
+        {
+            long times = record.getDateCreation( ).getTime( );
+            Date date = new Date( times );
+            DateFormat sdf = new SimpleDateFormat( "yyyy/MM/dd HH:mm:ss" );
+            String strDate = sdf.format( date );
+            if ( strDate != null )
+                return strDate;
+        }
+
+        return "";
+    }
+
+    private String getDateModification( int nIdRecord )
+    {
+        Plugin pluginDirectory = PluginService.getPlugin( DirectoryPlugin.PLUGIN_NAME );
+
+        Record record = RecordHome.findByPrimaryKey( nIdRecord, pluginDirectory );
+        if ( record != null )
+        {
+            long times = record.getDateModification( ).getTime( );
+            Date date = new Date( times );
+            DateFormat sdf = new SimpleDateFormat( "yyyy/MM/dd HH:mm:ss" );
+            String strDate = sdf.format( date );
+            if ( strDate != null )
+                return strDate;
+        }
+
+        return "";
     }
 
     public String getCreateRecordJsonBody( int nIdTable, List<EudonetRestData> _entries, int nIdRessource, int nIdDirectory )

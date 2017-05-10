@@ -34,10 +34,12 @@
 package fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.web;
 
 import fr.paris.lutece.plugins.directory.business.DirectoryHome;
+import fr.paris.lutece.plugins.directory.business.EntryFilter;
 import fr.paris.lutece.plugins.directory.business.IEntry;
 import fr.paris.lutece.plugins.directory.service.DirectoryPlugin;
 import fr.paris.lutece.plugins.directory.utils.DirectoryUtils;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.EudonetRestData;
+import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.ReferenceItemSorted;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.TaskEudonetRestConfig;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.TaskEudonetRestConfigHome;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.service.EudonetClient;
@@ -47,6 +49,7 @@ import fr.paris.lutece.plugins.workflow.web.task.NoFormTaskComponent;
 import fr.paris.lutece.plugins.workflowcore.service.config.ITaskConfigService;
 import fr.paris.lutece.plugins.workflowcore.service.task.ITask;
 import fr.paris.lutece.portal.service.admin.AdminUserService;
+import fr.paris.lutece.portal.service.i18n.I18nService;
 import fr.paris.lutece.portal.service.plugin.Plugin;
 import fr.paris.lutece.portal.service.plugin.PluginService;
 import fr.paris.lutece.portal.service.template.AppTemplateService;
@@ -61,6 +64,8 @@ import org.apache.commons.lang.StringUtils;
 
 import com.sun.jersey.api.client.ClientResponse;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -107,6 +112,13 @@ public class EudonetRestTaskComponent extends NoFormTaskComponent
     public static final String PARAMETER_EUDONET_ATTRIBUT = "eudonet_attribut";
     public static final String PARAMETER_EUDONET_TABLE = "eudonet_table";
     public static final String PARAMETER_ID_ENTRY = "id_entry";
+
+    // Constants
+    private static final String CONSTANT_ENTRY_DATE_CREATION = "-2";
+    private static final String CONSTANT_ENTRY_DATE_MODIFICATION = "-3";
+
+    public static final String CONSTANT_I18_LABEL_ENTRY_DATE_CREATION = "module.workflow.eudonetrestdirectory.task_eudonet_config.label.creation_date";
+    public static final String CONSTANT_I18_LABEL_ENTRY_DATE_MODIFICATION = "module.workflow.eudonetrestdirectory.task_eudonet_config.label.modification_date";
 
     // SERVICES
     @Inject
@@ -240,15 +252,15 @@ public class EudonetRestTaskComponent extends NoFormTaskComponent
             }
         }
 
-        ReferenceList tableList = getEudonetTables( );
+        // ReferenceList tableList = getEudonetTables( );
 
-        ReferenceList attributList = getEudonetAttribut( );
+        // ReferenceList attributList = getEudonetAttribut( );
 
         model.put( EudonetRestDirctoryConstants.MARK_DIRECTORY_LIST, getListDirectories( ) );
         model.put( EudonetRestDirctoryConstants.MARK_LIST_ENTRIES, getListEntries( nIdDirectory, request ) );
-        model.put( MARKER_LIST_TABLE_EUDONET, tableList );
-        model.put( MARKER_LIST_TABLE_EUDONET_LINK, tableList );
-        model.put( MARKER_LIST_ATTRIBUT_EUDONET, attributList );
+        model.put( MARKER_LIST_TABLE_EUDONET, getEudonetTables( ) );
+        model.put( MARKER_LIST_TABLE_EUDONET_LINK, getEudonetTables( ) );
+        model.put( MARKER_LIST_ATTRIBUT_EUDONET, getEudonetAttribut( ) );
 
         HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_TASK_EUDONET, locale, model );
 
@@ -298,15 +310,16 @@ public class EudonetRestTaskComponent extends NoFormTaskComponent
      * 
      * @return tables list
      */
-    private ReferenceList getEudonetTables( )
+    private List<ReferenceItemSorted> getEudonetTables( )
     {
         ReferenceList tableList = new ReferenceList( );
 
-        ReferenceList referenceList = new ReferenceList( );
-        ReferenceItem referenceItemVide = new ReferenceItem( );
-        referenceItemVide.setCode( "" );
-        referenceItemVide.setName( "" );
-        referenceList.add( referenceItemVide );
+        List<ReferenceItemSorted> referenceList = new ArrayList<ReferenceItemSorted>( );
+
+        ReferenceItemSorted referenceItemSorted = new ReferenceItemSorted( );
+        referenceItemSorted.setCode( "" );
+        referenceItemSorted.setName( "" );
+        referenceList.add( referenceItemSorted );
 
         if ( _config != null )
         {
@@ -321,12 +334,14 @@ public class EudonetRestTaskComponent extends NoFormTaskComponent
 
             for ( ReferenceItem item : tableList )
             {
-                ReferenceItem referenceItem = new ReferenceItem( );
+                ReferenceItemSorted referenceItem = new ReferenceItemSorted( );
                 referenceItem.setCode( item.getCode( ) + "-" + item.getName( ) );
                 referenceItem.setName( item.getName( ) );
                 referenceList.add( referenceItem );
             }
         }
+
+        Collections.sort( referenceList );
 
         return referenceList;
     }
@@ -336,15 +351,16 @@ public class EudonetRestTaskComponent extends NoFormTaskComponent
      * 
      * @return attributs list
      */
-    private ReferenceList getEudonetAttribut( )
+    private List<ReferenceItemSorted> getEudonetAttribut( )
     {
-        ReferenceList referenceList = new ReferenceList( );
+        List<ReferenceItemSorted> referenceList = new ArrayList<ReferenceItemSorted>( );
+
+        ReferenceItemSorted referenceItemSorted = new ReferenceItemSorted( );
+        referenceItemSorted.setCode( "" );
+        referenceItemSorted.setName( "" );
+        referenceList.add( referenceItemSorted );
 
         ReferenceList attributList = new ReferenceList( );
-        ReferenceItem referenceItemVide = new ReferenceItem( );
-        referenceItemVide.setCode( "" );
-        referenceItemVide.setName( "" );
-        referenceList.add( referenceItemVide );
 
         if ( _config != null )
         {
@@ -378,13 +394,15 @@ public class EudonetRestTaskComponent extends NoFormTaskComponent
 
                 if ( !isContain )
                 {
-                    ReferenceItem referenceItem = new ReferenceItem( );
+                    ReferenceItemSorted referenceItem = new ReferenceItemSorted( );
                     referenceItem.setCode( item.getCode( ) + "-" + item.getName( ) );
                     referenceItem.setName( item.getName( ) );
                     referenceList.add( referenceItem );
                 }
             }
         }
+
+        Collections.sort( referenceList );
 
         return referenceList;
     }
@@ -398,17 +416,28 @@ public class EudonetRestTaskComponent extends NoFormTaskComponent
      *            request
      * @return ReferenceList entries list
      */
-    private static ReferenceList getListEntries( int nIdDirectory, HttpServletRequest request )
+    private static List<ReferenceItemSorted> getListEntries( int nIdDirectory, HttpServletRequest request )
     {
         if ( nIdDirectory != -1 )
         {
             Plugin pluginDirectory = PluginService.getPlugin( DirectoryPlugin.PLUGIN_NAME );
             List<IEntry> listEntries = DirectoryUtils.getFormEntries( nIdDirectory, pluginDirectory, AdminUserService.getAdminUser( request ) );
-            ReferenceList referenceList = new ReferenceList( );
-            ReferenceItem referenceItemVide = new ReferenceItem( );
-            referenceItemVide.setCode( "" );
-            referenceItemVide.setName( "" );
-            referenceList.add( referenceItemVide );
+            List<ReferenceItemSorted> referenceList = new ArrayList<ReferenceItemSorted>( );
+
+            ReferenceItemSorted referenceItemSorted = new ReferenceItemSorted( );
+            referenceItemSorted.setCode( "" );
+            referenceItemSorted.setName( "" );
+            referenceList.add( referenceItemSorted );
+
+            ReferenceItemSorted referenceItemSortedCD = new ReferenceItemSorted( );
+            referenceItemSortedCD.setCode( CONSTANT_ENTRY_DATE_CREATION );
+            referenceItemSortedCD.setName( I18nService.getLocalizedString( CONSTANT_I18_LABEL_ENTRY_DATE_CREATION, request.getLocale( ) ) );
+            referenceList.add( referenceItemSortedCD );
+
+            ReferenceItemSorted referenceItemSortedMD = new ReferenceItemSorted( );
+            referenceItemSortedMD.setCode( CONSTANT_ENTRY_DATE_MODIFICATION );
+            referenceItemSortedMD.setName( I18nService.getLocalizedString( CONSTANT_I18_LABEL_ENTRY_DATE_MODIFICATION, request.getLocale( ) ) );
+            referenceList.add( referenceItemSortedMD );
 
             for ( IEntry entry : listEntries )
             {
@@ -428,7 +457,7 @@ public class EudonetRestTaskComponent extends NoFormTaskComponent
                                 continue;
                             }
 
-                            ReferenceItem referenceItem = new ReferenceItem( );
+                            ReferenceItemSorted referenceItem = new ReferenceItemSorted( );
                             referenceItem.setCode( String.valueOf( child.getIdEntry( ) ) );
                             referenceItem.setName( child.getTitle( ) );
                             referenceList.add( referenceItem );
@@ -437,18 +466,20 @@ public class EudonetRestTaskComponent extends NoFormTaskComponent
                 }
                 else
                 {
-                    ReferenceItem referenceItem = new ReferenceItem( );
+                    ReferenceItemSorted referenceItem = new ReferenceItemSorted( );
                     referenceItem.setCode( String.valueOf( entry.getIdEntry( ) ) );
                     referenceItem.setName( entry.getTitle( ) );
                     referenceList.add( referenceItem );
                 }
             }
 
+            Collections.sort( referenceList );
+
             return referenceList;
         }
         else
         {
-            return new ReferenceList( );
+            return new ArrayList<ReferenceItemSorted>( );
         }
     }
 
