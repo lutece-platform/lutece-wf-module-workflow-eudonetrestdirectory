@@ -23,6 +23,11 @@ public class PurgeResourceDaemon extends Daemon
         deleteResource( );
     }
 
+    /**
+     * get the eligible records to delete
+     * 
+     * @return List<Record>
+     */
     public List<Record> getEligibleRecordsToDelete( )
     {
         List<Record> recordsToDeleteList = new ArrayList<Record>( );
@@ -46,6 +51,11 @@ public class PurgeResourceDaemon extends Daemon
         return recordsToDeleteList;
     }
 
+    /**
+     * get the records to delete
+     * 
+     * @return List<Record>
+     */
     public List<Record> getRecordsToDelete( )
     {
         List<Record> recordsToDeleteList = new ArrayList<Record>( );
@@ -62,6 +72,11 @@ public class PurgeResourceDaemon extends Daemon
         return recordsToDeleteList;
     }
 
+    /**
+     * get the EudonetLinks to delete
+     * 
+     * @return List<EudonetLink>
+     */
     public List<EudonetLink> getEudonetLinksToDelete( )
     {
         List<EudonetLink> eudonetLinksToDeleteList = new ArrayList<EudonetLink>( );
@@ -78,6 +93,9 @@ public class PurgeResourceDaemon extends Daemon
         return eudonetLinksToDeleteList;
     }
 
+    /**
+     * delete all resources
+     */
     public void deleteResource( )
     {
         List<Record> recordsToDelete = getRecordsToDelete( );
