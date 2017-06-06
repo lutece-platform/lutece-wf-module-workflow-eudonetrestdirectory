@@ -22,7 +22,6 @@
 	<bean id="workflow-eudonetrestdirectory.taskExportDemandType" class="fr.paris.lutece.plugins.workflowcore.business.task.TaskType"
 		p:key="taskExportDemand"
 		p:titleI18nKey="module.workflow.eudonetrestdirectory.task_export_demand_title"
-														 
 		p:beanName="workflow-eudonetrestdirectory.taskExportDemand"
 		p:configBeanName="workflow-eudonetrestdirectory.taskExportDemandConfig"
 		p:configRequired="true"
