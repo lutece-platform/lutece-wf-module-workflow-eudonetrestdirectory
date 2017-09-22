@@ -335,12 +335,15 @@ public class BuildJsonBodyService
         for ( Integer i : listTableLinked )
         {
             EudonetLink eudonetLink = EudonetLinkHome.findBy( nIdRessource, i );
-            JSONObject jsonObject = new JSONObject( );
+            if(eudonetLink!=null)
+            {
+            	JSONObject jsonObject = new JSONObject( );
 
-            jsonObject.accumulate( "DescId", eudonetLink.getIdTable( ) );
-            jsonObject.accumulate( "Value", "" + eudonetLink.getIdField( ) );
+                jsonObject.accumulate( "DescId", eudonetLink.getIdTable( ) );
+                jsonObject.accumulate( "Value", "" + eudonetLink.getIdField( ) );
 
-            jsonArray.add( jsonObject );
+                jsonArray.add( jsonObject );
+            }
         }
 
         jsonObjectFinal.accumulate( "Fields", jsonArray );
