@@ -106,7 +106,14 @@
 <div class="form-group">
 	<label class="control-label col-xs-12 col-sm-12 col-md-3 col-lg-3" for="idDirectory">#i18n{module.workflow.eudonetrestdirectory.task_eudonet_config.label.mapping} </label>
 	<div class="col-xs-12 col-sm-12 col-md-9 col-lg-9">
-		<@comboWithParams name="order_entry" default_value=idDirectory?string additionalParameters="class=\"input-xxlarge\"" items=list_entries />
+		#i18n{module.workflow.eudonetrestdirectory.task_eudonet_config.label.default_entry_value} : 
+		<input type="checkbox"  id="entry_value" >
+		<div id="id_entry_default_value" style="display:inline-block;" >
+			<input type="text" class="form-control input-sm" name="entry_default_value" value=""/>
+		</div>
+		<div id="id_entry_value" style="display:inline-block;">
+			<@comboWithParams name="order_entry" default_value=idDirectory?string additionalParameters="class=\"input-xxlarge\"" items=list_entries />
+		</div>
 		<@comboWithParams name="eudonet_attribut" default_value="" additionalParameters="class=\"input-xxlarge\"" items=list_attribut />
 		<button type="submit" value="createEntry" name="apply" class="btn btn-primary btn-sm btn-flat">
 			<i class="glyphicon glyphicon-ok-circle"></i>&nbsp;#i18n{module.workflow.eudonetrestdirectory.task_eudonet_config.button.apply}
@@ -122,8 +129,9 @@
             <th>Attribut Eudonet</th>
             <th>Table Eudonet</th>
             <th>Annexe (PJ)</th>
-            <th>Valeur Entrie</th>
-            <th>Nom Entrie</th>
+            <th>#i18n{module.workflow.eudonetrestdirectory.task_eudonet_config.label.entry_value}</th>
+            <th>#i18n{module.workflow.eudonetrestdirectory.task_eudonet_config.label.name_entry_value}</th>
+            <th>#i18n{module.workflow.eudonetrestdirectory.task_eudonet_config.label.default_entry_value}</th>
             <th>#i18n{portal.util.labelActions}</th>
         </tr>
         <@tableHeadBodySeparator />
@@ -140,16 +148,19 @@
               ${entrie.idTableLink!}
             </td>
             <td>
-              ${entrie.orderEntry!}
+            	<#if entrie.orderEntry!=0>
+              		${entrie.orderEntry!}
+              	</#if>
             </td>
             <td>
               <#list list_entries as ent>
-
-			<#if ent.code?string == entrie.orderEntry?string  >
-				${ent.name!}
-
-			</#if>			
-		</#list>
+              	<#if ent.code?string == entrie.orderEntry?string  >
+					${ent.name!}
+				</#if>
+			</#list>
+            </td>
+            <td>
+            	${entrie.defaultValue!}
             </td>
         <td>
 	 
@@ -167,5 +178,20 @@
 <script>
 function updateIdEntry(idEntry){
 	$('#id_entry').val(idEntry);
-}
+};
+
+$(document).ready(function(){
+	$("#id_entry_default_value").hide();
+    $('#entry_value').change(function(){
+        if(this.checked){
+        	$("#id_entry_default_value").show();
+    		$("#id_entry_value").hide();
+        }
+        else{
+        	$("#id_entry_default_value").hide();
+    		$("#id_entry_value").show();
+        }
+
+    });
+});
 </script>

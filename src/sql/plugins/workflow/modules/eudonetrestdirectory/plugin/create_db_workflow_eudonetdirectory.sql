@@ -49,6 +49,6 @@ CREATE TABLE task_eudonetrest_table_link(
   PRIMARY KEY ( id )
 );
 
-
-
+alter table task_create_eudonet_data_cf
+add column eudonet_default_value varchar(255) default NULL;
   

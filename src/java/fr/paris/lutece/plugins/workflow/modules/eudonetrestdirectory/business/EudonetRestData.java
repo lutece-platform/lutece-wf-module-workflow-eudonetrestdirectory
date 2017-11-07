@@ -49,6 +49,8 @@ public class EudonetRestData
     @NotNull
     private int _nIdConfig;
 
+    private String _strDefaultValue;
+
     /**
      * @return Id
      */
@@ -143,5 +145,22 @@ public class EudonetRestData
     public void setIdConfig( int idConfig )
     {
         _nIdConfig = idConfig;
+    }
+
+    /**
+     * @return the _strDefaultValue
+     */
+    public String getDefaultValue( )
+    {
+        return _strDefaultValue;
+    }
+
+    /**
+     * @param _strDefaultValue
+     *            the _strDefaultValue to set
+     */
+    public void setDefaultValue( String _strDefaultValue )
+    {
+        this._strDefaultValue = _strDefaultValue;
     }
 }

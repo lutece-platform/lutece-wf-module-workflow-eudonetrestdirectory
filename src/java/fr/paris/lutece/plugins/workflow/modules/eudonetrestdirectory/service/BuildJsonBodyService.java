@@ -299,8 +299,10 @@ public class BuildJsonBodyService
                 String strIdAtt = entry.getIdAttribut( ).split( "-" ) [0];
                 JSONObject jsonObject = new JSONObject( );
                 jsonObject.accumulate( "DescId", Integer.parseInt( strIdAtt ) );
-
-                jsonObject.accumulate( "Value", getRecordFieldValue( entry.getOrderEntry( ), nIdRessource, nIdDirectory ) );
+                if ( entry.getDefaultValue( ) != null && !entry.getDefaultValue( ).isEmpty( ) )
+                    jsonObject.accumulate( "Value", entry.getDefaultValue( ) );
+                else
+                    jsonObject.accumulate( "Value", getRecordFieldValue( entry.getOrderEntry( ), nIdRessource, nIdDirectory ) );
 
                 jsonArray.add( jsonObject );
             }
@@ -326,7 +328,10 @@ public class BuildJsonBodyService
                 JSONObject jsonObject = new JSONObject( );
 
                 jsonObject.accumulate( "DescId", Integer.parseInt( strIdAtt ) );
-                jsonObject.accumulate( "Value", getRecordFieldValue( entry.getOrderEntry( ), nIdRessource, nIdDirectory ) );
+                if ( entry.getDefaultValue( ) != null && !entry.getDefaultValue( ).isEmpty( ) )
+                    jsonObject.accumulate( "Value", entry.getDefaultValue( ) );
+                else
+                    jsonObject.accumulate( "Value", getRecordFieldValue( entry.getOrderEntry( ), nIdRessource, nIdDirectory ) );
 
                 jsonArray.add( jsonObject );
             }
@@ -335,9 +340,9 @@ public class BuildJsonBodyService
         for ( Integer i : listTableLinked )
         {
             EudonetLink eudonetLink = EudonetLinkHome.findBy( nIdRessource, i );
-            if(eudonetLink!=null)
+            if ( eudonetLink != null )
             {
-            	JSONObject jsonObject = new JSONObject( );
+                JSONObject jsonObject = new JSONObject( );
 
                 jsonObject.accumulate( "DescId", eudonetLink.getIdTable( ) );
                 jsonObject.accumulate( "Value", "" + eudonetLink.getIdField( ) );

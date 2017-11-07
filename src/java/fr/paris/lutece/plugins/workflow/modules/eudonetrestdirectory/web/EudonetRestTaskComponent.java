@@ -97,6 +97,7 @@ public class EudonetRestTaskComponent extends NoFormTaskComponent
     public static final String PARAMETER_ID_TELESERVICE = "id_teleservice";
     public static final String PARAMETER_ID_TABLE_EUDONET = "id_tableEudonet";
     public static final String PARAMETER_ID_TABLE_EUDONET_LINK = "id_tableEudonet_link";
+    public static final String PARAMETER_ENTRY_DEFAULT_VALUE = "entry_default_value";
     public static final String PARAMETER_BASE_URL = "base_url";
     public static final String PARAMETER_SUBSCRIBER_LOGIN = "subscriber_login";
     public static final String PARAMETER_SUBSCRIBER_PASSWORD = "subscriber_password";
@@ -162,10 +163,20 @@ public class EudonetRestTaskComponent extends NoFormTaskComponent
             String eudonetAttribut = request.getParameter( PARAMETER_EUDONET_ATTRIBUT );
             String eudonetTable = request.getParameter( PARAMETER_ID_TABLE_EUDONET );
             String eudonetTableLink = request.getParameter( PARAMETER_ID_TABLE_EUDONET_LINK );
+            String eudonetEntryDefaulValue = request.getParameter( PARAMETER_ENTRY_DEFAULT_VALUE );
 
             EudonetRestData data = new EudonetRestData( );
             data.setIdConfig( task.getId( ) );
-            data.setOrderEntry( Integer.parseInt( ordreEntry ) );
+
+            if ( eudonetEntryDefaulValue != null && !eudonetEntryDefaulValue.isEmpty( ) )
+            {
+                data.setDefaultValue( eudonetEntryDefaulValue );
+            }
+            else
+            {
+                data.setOrderEntry( Integer.parseInt( ordreEntry ) );
+            }
+
             data.setIdTable( eudonetTable );
             data.setIdAttribut( eudonetAttribut );
             data.setIdTableLink( eudonetTableLink );
