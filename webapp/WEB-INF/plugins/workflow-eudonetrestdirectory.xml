@@ -2,7 +2,7 @@
     <!-- Plugin Informations -->
     <name>workflow-eudonetrestdirectory</name>
     <class>fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.service.EudonetRestDirectoryPlugin</class>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <documentation/>
     <installation/>
     <changes/>
