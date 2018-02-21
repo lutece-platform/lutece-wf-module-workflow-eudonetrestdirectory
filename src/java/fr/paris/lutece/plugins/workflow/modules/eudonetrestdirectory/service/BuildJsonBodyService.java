@@ -187,9 +187,9 @@ public class BuildJsonBodyService
      * @param nIdDirectory
      * @return record field value
      */
-    public File getRecordFileValue( int nIdEntry, int nIdRecord, int nIdDirectory )
+    public List<File> getRecordFileValue( int nIdEntry, int nIdRecord, int nIdDirectory )
     {
-        String strRecordFieldValue = StringUtils.EMPTY;
+    	List<File> listFile= new ArrayList<File>();
         Plugin pluginDirectory = PluginService.getPlugin( DirectoryPlugin.PLUGIN_NAME );
 
         IEntry entry = EntryHome.findByPrimaryKey( nIdEntry, pluginDirectory );
@@ -205,17 +205,18 @@ public class BuildJsonBodyService
 
             if ( entry.getEntryType( ).getIdType( ) == 8 )
             {
-                RecordField recordFieldIdDemand = listRecordFields.get( 0 );
-                strRecordFieldValue = recordFieldIdDemand.getValue( );
 
-                if ( recordFieldIdDemand.getFile( ) != null )
-                {
-                    return recordFieldIdDemand.getFile( );
+                for(RecordField filed: listRecordFields){
+	                if ( filed.getFile( ) != null )
+	                {
+	                	listFile.add(filed.getFile( ));
+	                    //return recordFieldIdDemand.getFile( );
+	                }
                 }
             }
         }
 
-        return null;
+        return listFile;
     }
 
     /**
@@ -366,8 +367,8 @@ public class BuildJsonBodyService
             String strIdTable = entry.getIdTable( ).split( "-" ) [0];
             if ( !strIdTableLink.isEmpty( ) && strIdTable.equals( "" + nIdTable ) )
             {
-                File file = getRecordFileValue( entry.getOrderEntry( ), nIdRessource, nIdDirectory );
-                if ( file != null )
+                List<File> listFile = getRecordFileValue( entry.getOrderEntry( ), nIdRessource, nIdDirectory );
+                for ( File file: listFile )
                 {
                     PhysicalFile physicalFile = PhysicalFileHome.findByPrimaryKey( file.getPhysicalFile( ).getIdPhysicalFile( ), _pluginDirectory );
                     String strFileName = file.getTitle( );
