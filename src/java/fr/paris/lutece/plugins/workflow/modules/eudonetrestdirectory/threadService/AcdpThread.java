@@ -11,9 +11,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import fr.paris.lutece.plugins.directory.business.Record;
 import fr.paris.lutece.plugins.directory.business.RecordHome;
 import fr.paris.lutece.plugins.directory.service.DirectoryPlugin;
-import fr.paris.lutece.plugins.gfa.business.GfaResourceDTO;
-import fr.paris.lutece.plugins.gfa.business.service.IProcessTaskErrorService;
-import fr.paris.lutece.plugins.gfa.business.service.ProcessTaskErrorService;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.EudonetLink;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.EudonetLinkHome;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.EudonetRestData;
@@ -21,7 +18,6 @@ import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.service.Bui
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.service.EudonetClient;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.service.EudonetRestWsService;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.utils.EudonetRestException;
-import fr.paris.lutece.plugins.workflowcore.business.resource.ResourceHistory;
 import fr.paris.lutece.portal.service.plugin.Plugin;
 import fr.paris.lutece.portal.service.plugin.PluginService;
 import fr.paris.lutece.portal.service.util.AppLogService;
@@ -40,7 +36,7 @@ public class AcdpThread extends Thread
     private EudonetRestException _eudonetException;
     private boolean _bRunning;
 
-    IProcessTaskErrorService _erroService = ProcessTaskErrorService.getService( );
+   // IProcessTaskErrorService _erroService = ProcessTaskErrorService.getService( );
 
     /**
      * constructor
@@ -76,8 +72,8 @@ public class AcdpThread extends Thread
 
         Record record = RecordHome.findByPrimaryKey( _nIdResource, pluginDirectory );
 
-        GfaResourceDTO gfaResourceDTO = getGfaResourceDTO( );
-        fr.paris.lutece.plugins.gfa.business.Error error = gfaResourceDTO.getError( ).get( 0 );
+      //  GfaResourceDTO gfaResourceDTO = getGfaResourceDTO( );
+      //  fr.paris.lutece.plugins.gfa.business.Error error = gfaResourceDTO.getError( ).get( 0 );
 
         try
         {
@@ -97,7 +93,7 @@ public class AcdpThread extends Thread
             {
                 AppLogService.error( "Erreur d'authentification sur eudonet" );
                 bError = true;
-                error.setError( "Erreur d'authentification sur eudonet" );
+              //  error.setError( "Erreur d'authentification sur eudonet" );
             }
 
         }
@@ -106,16 +102,16 @@ public class AcdpThread extends Thread
             AppLogService.error( "error calling addProjectsInEudonet method : " + ex.getMessage( ), ex );
             _bRunning = false;
             bError = true;
-            error.setError( "error calling addProjectsInEudonet method : " + ex.getMessage( ) );
+         //   error.setError( "error calling addProjectsInEudonet method : " + ex.getMessage( ) );
         }
 
         if ( bError )
         {
-            _erroService.saveErrorTrace( gfaResourceDTO );
+           // _erroService.saveErrorTrace( gfaResourceDTO );
         }
         else
         {
-            _erroService.deleteErrorTrace( record.getIdRecord( ) );
+           // _erroService.deleteErrorTrace( record.getIdRecord( ) );
         }
 
         _bRunning = false;
@@ -452,7 +448,7 @@ public class AcdpThread extends Thread
         return idTableListDistinct;
     }
 
-    public GfaResourceDTO getGfaResourceDTO( )
+  /*  public GfaResourceDTO getGfaResourceDTO( )
     {
         Plugin pluginDirectory = PluginService.getPlugin( DirectoryPlugin.PLUGIN_NAME );
 
@@ -474,5 +470,5 @@ public class AcdpThread extends Thread
         gfaResourceDTO.setError( listError );
 
         return gfaResourceDTO;
-    }
+    }*/
 }

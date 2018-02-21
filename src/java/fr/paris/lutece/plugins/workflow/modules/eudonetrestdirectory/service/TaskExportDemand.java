@@ -33,13 +33,6 @@
  */
 package fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.service;
 
-import fr.paris.lutece.plugins.appointment.business.Appointment;
-import fr.paris.lutece.plugins.directory.business.Record;
-import fr.paris.lutece.plugins.directory.business.RecordHome;
-import fr.paris.lutece.plugins.directory.service.DirectoryPlugin;
-import fr.paris.lutece.plugins.gfa.business.GfaResourceDTO;
-import fr.paris.lutece.plugins.gfa.business.service.IProcessTaskErrorService;
-import fr.paris.lutece.plugins.gfa.business.service.ProcessTaskErrorService;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.EudonetRestData;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.TaskEudonetRestConfig;
 import fr.paris.lutece.plugins.workflow.modules.eudonetrestdirectory.business.TaskEudonetRestConfigHome;
@@ -47,12 +40,9 @@ import fr.paris.lutece.plugins.workflowcore.business.resource.ResourceHistory;
 import fr.paris.lutece.plugins.workflowcore.service.config.ITaskConfigService;
 import fr.paris.lutece.plugins.workflowcore.service.resource.IResourceHistoryService;
 import fr.paris.lutece.plugins.workflowcore.service.task.SimpleTask;
-import fr.paris.lutece.portal.service.plugin.Plugin;
-import fr.paris.lutece.portal.service.plugin.PluginService;
 import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -68,13 +58,10 @@ import javax.servlet.http.HttpServletRequest;
 public class TaskExportDemand extends SimpleTask
 {
     // <constants
-    private static final String CONSTANT_RESOURCE_ID_APPOINTMENTFORM = "1";
-    private static final String CONSTANT_RESOURCE_ID_DIRECTORY = "2";
 
     // PROPERTIES
     private static final String PROPERTY_TASK_TITLE = "workflow.eudonetrestdirectory.task.title";
     public static final String CONFIG_SERVICE_BEAN_NAME = "workflow-eudonetrestdirectory.taskEudonetRestConfigService";
-    private static final String ACTION = "ACDP ACTION";
     private static IEudonetRestWsService _eudonetService;
 
     // SERVICES
@@ -86,7 +73,7 @@ public class TaskExportDemand extends SimpleTask
     @Named( CONFIG_SERVICE_BEAN_NAME )
     private ITaskConfigService _taskConfigService;
 
-    IProcessTaskErrorService _erroService = ProcessTaskErrorService.getService( );
+   // IProcessTaskErrorService _erroService = ProcessTaskErrorService.getService( );
 
     /**
      * {@inheritDoc}
