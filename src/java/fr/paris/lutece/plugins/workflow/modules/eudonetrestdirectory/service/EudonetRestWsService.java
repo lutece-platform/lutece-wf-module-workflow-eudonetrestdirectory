@@ -57,7 +57,7 @@ public class EudonetRestWsService implements IEudonetRestWsService
         {
             if ( ( _acdpThread != null ) && ( _acdpThread.getEudonetException( ) != null ) )
             {
-                AppLogService.error( "La demande numero " + idResource + ": " + " n'a pas pu être exportée dans PVNET" + "\n" );
+                AppLogService.error( "La demande numero " + idResource + ": " + " n'a pas pu être exportée dans Eudonet" + "\n" );
                 AppLogService.error( "Exception", _acdpThread.getEudonetException( ) );
 
                 EudonetRestException exception = _acdpThread.getEudonetException( );
